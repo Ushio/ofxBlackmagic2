@@ -80,13 +80,17 @@ namespace ofxBlackmagic {
 		bool isUsingTexture() const override;
 		//
 		//--
-
+		const std::vector<int16_t> &getAudioData() const {
+			return audiodata;
+		}
 	protected:
 		DeviceDefinition device;
 		IDeckLinkInput* input;
 		Frame videoFrame;
 		ofTexture texture;
 		bool useTexture;
+
+		std::vector<int16_t> audiodata;
 
 		enum {Waiting, Running} state;
 		bool newFrameReady; // pre-update

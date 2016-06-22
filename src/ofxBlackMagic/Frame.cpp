@@ -30,6 +30,16 @@ namespace ofxBlackmagic {
 	}
 
 	//----------
+	void Frame::copyFromFrame(IDeckLinkAudioInputPacket *audioPacket) {
+		int sampleCount = audioPacket->GetSampleFrameCount();
+		void *audio_ptr = nullptr;
+		if (audioPacket->GetBytes(&audio_ptr) == S_OK) {
+			std::size_t count_already = audio.size();
+			audio.resize(count_already + sampleCount * 2);
+			int16_t *insertHead = audio.data() + count_already;
+			memcpy(insertHead, audio_ptr, sampleCount * sizeof(int16_t) * 2);
+		}
+	}
 	void Frame::copyFromFrame(IDeckLinkVideoFrame* inputFrame) {
 		auto inputFormat = inputFrame->GetPixelFormat();
 		
@@ -82,8 +92,6 @@ namespace ofxBlackmagic {
 		} else {
 			timecode->GetComponents(&this->timecode.hours, &this->timecode.minutes, &this->timecode.seconds, &this->timecode.frames);
 		}
-
-		//inputFrame->GetAncillaryData(&this->ancillary);
 	}
 	
 	//----------

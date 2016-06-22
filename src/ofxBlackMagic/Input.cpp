@@ -23,6 +23,7 @@ namespace ofxBlackmagic {
 			CHECK_ERRORS(device.device->QueryInterface(IID_IDeckLinkInput, (void**)&this->input), "Failed to query interface");
 			CHECK_ERRORS(this->input->SetCallback(this), "Failed to set input callback");
 			CHECK_ERRORS(this->input->EnableVideoInput(format, bmdFormat8BitYUV, 0), "Failed to enable video input");
+			CHECK_ERRORS(this->input->EnableAudioInput(bmdAudioSampleRate48kHz, bmdAudioSampleType16bitInteger, 2), "Failed to enable video input");
 			CHECK_ERRORS(this->input->StartStreams(), "Failed to start streams");
 			this->state = Running;
 		} catch(std::exception& e) {
@@ -81,12 +82,16 @@ namespace ofxBlackmagic {
 	
 	//---------
 	HRESULT Input::VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioFrame) {
-		if (videoFrame == NULL) {
+		if (audioFrame == NULL && audioFrame == NULL) {
 			return S_OK;
 		}
-
 		this->videoFrame.lock.lock();
-		this->videoFrame.copyFromFrame(videoFrame);
+		if (videoFrame != NULL) {
+			this->videoFrame.copyFromFrame(videoFrame);
+		}
+		if (audioFrame != NULL) {
+			this->videoFrame.copyFromFrame(audioFrame);
+		}
 		this->videoFrame.lock.unlock();
 		this->newFrameReady = true;
 
@@ -104,6 +109,8 @@ namespace ofxBlackmagic {
 
 			this->videoFrame.lock.lock();
 			this->texture.loadData(this->videoFrame.getPixels(), this->getWidth(), this->getHeight(), GL_RGBA);
+			this->audiodata = this->videoFrame.getAudio();
+			this->videoFrame.clearAudio();
 			this->videoFrame.lock.unlock();
 		}
 	}

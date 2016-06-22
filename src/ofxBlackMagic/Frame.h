@@ -20,7 +20,8 @@ namespace ofxBlackmagic {
 		~Frame();
 		void allocate(int width, int height);
 		void deallocate();
-		void copyFromFrame(IDeckLinkVideoFrame*);
+		void copyFromFrame(IDeckLinkVideoFrame *);
+		void copyFromFrame(IDeckLinkAudioInputPacket *);
 
 		int getWidth() const;
 		int getHeight() const;
@@ -35,7 +36,12 @@ namespace ofxBlackmagic {
 		const ofPixels & getPixels() const override;
 		//
 		//--
-
+		const std::vector<int16_t> &getAudio() const {
+			return audio;
+		}
+		void clearAudio() {
+			audio.clear();
+		}
 	protected:
 		//--
 		//IDeckLinkVideoFrame
@@ -70,6 +76,9 @@ namespace ofxBlackmagic {
 		unsigned char* data;
 		IDeckLinkVideoFrameAncillary* ancillary;
 		int references;
+
+		// audio
+		std::vector<int16_t> audio;
 	};
 }
 
